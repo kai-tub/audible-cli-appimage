@@ -1,0 +1,29 @@
+name: Main
+
+on: push
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      id-token: write
+    steps:
+      - uses: DeterminateSystems/nix-installer-action@main
+      - uses: DeterminateSystems/magic-nix-cache-action@main
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Run `nix fmt check`
+        run: nix fmt -- --check *
+      - name: Run `flake checks`
+        run: nix flake check -L
+      - name: Create AppImage
+        run: nix build .#audibleAppImage
+      - name: Rename AppImage
+        if: startsWith(github.ref, 'refs/tags/')
+        run: cp ./result audible.AppImage
+      - name: Release
+        uses: softprops/action-gh-release@v2
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: audible.AppImage
