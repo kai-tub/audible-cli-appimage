@@ -3,6 +3,7 @@
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-unstable";
     systems.url = "github:nix-systems/x86_64-linux";
+    flake-compat.url = "https://flakehub.com/f/edolstra/flake-compat/1.tar.gz";
     # nix-filter.url = "github:numtide/nix-filter";
     # devshell.url = "github:numtide/devshell";
     nix-appimage = {
@@ -15,6 +16,7 @@
     nixpkgs,
     systems,
     nix-appimage,
+    flake-compat,
     # nix-filter,
     # devshell,
   } @ inputs: let
@@ -25,6 +27,13 @@
   in rec {
     formatter = eachSystem (system: pkgsFor.${system}.alejandra);
     checks = eachSystem (system: self.packages.${system});
+    overlays = rec {
+      default = audible-cli;
+
+      audible-cli = final: prev: {
+        audible-cli = inputs.self.packages.${prev.system}.audible-cli;
+      };
+    };
 
     packages = eachSystem (system: let
       pkgs = pkgsFor.${system};
