@@ -4,6 +4,8 @@ This repository contains the necessary plumbing to create an **unofficial** self
 [audible-cli](https://github.com/mkb79/audible-cli) [AppImage](https://appimage.org/)
 that can run on _any_ Linux distribution.
 
+The latest version can be downloaded from the [GitHub Releases](https://github.com/kai-tub/audible-cli-appimage/releases/).
+
 The AppImage _includes_ all the example plugins from upstream, such as:
 - [decrypt](https://github.com/mkb79/audible-cli/blob/master/plugin_cmds/cmd_decrypt.py)
 - [get-annotations](https://github.com/mkb79/audible-cli/blob/master/plugin_cmds/cmd_get-annotations.py)
