@@ -4,7 +4,7 @@
     nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-unstable";
     systems.url = "github:nix-systems/x86_64-linux";
     flake-compat.url = "https://flakehub.com/f/edolstra/flake-compat/1.tar.gz";
-    # nix-filter.url = "github:numtide/nix-filter";
+    nix-filter.url = "github:numtide/nix-filter";
     # devshell.url = "github:numtide/devshell";
     nix-appimage = {
       url = "github:ralismark/nix-appimage";
@@ -17,13 +17,13 @@
     systems,
     nix-appimage,
     flake-compat,
-    # nix-filter,
+    nix-filter,
     # devshell,
   } @ inputs: let
     eachSystem = nixpkgs.lib.genAttrs (import systems);
     # pkgsFor = eachSystem (system: (nixpkgs.legacyPackages.${system}.extend devshell.overlays.default));
     pkgsFor = eachSystem (system: (nixpkgs.legacyPackages.${system}));
-    # filter = nix-filter.lib;
+    filter = nix-filter.lib;
   in rec {
     formatter = eachSystem (system: pkgsFor.${system}.alejandra);
     checks = eachSystem (system: self.packages.${system});
@@ -37,15 +37,47 @@
 
     packages = eachSystem (system: let
       pkgs = pkgsFor.${system};
+      mk-test-runner = pkg:
+        pkgs.writeShellApplication {
+          name = "test-runner";
+          runtimeInputs = [pkgs.nushell pkg];
+          text = let
+            p = pkgs.stdenvNoCC.mkDerivation {
+              name = "test-runner";
+              src = filter {
+                root = ./.;
+                include = ["test.nu"];
+              };
+              installPhase = ''
+                cp $src/test.nu $out
+              '';
+            };
+          in ''
+            exec nu --no-config-file ${p} "$@"
+          '';
+        };
     in rec {
-      # FUTURE: Wrap the appimage in such way that the `audible` binary
-      # is called by default but that it auto-forwards calls to
-      # audible-quickstart if called via `quickstart`
       "audibleAppImage" = inputs.nix-appimage.mkappimage.${system} {
         drv = audible-cli;
         name = audible-cli.name;
         entrypoint = pkgs.lib.getExe audible-cli;
       };
+
+      test-runner = pkgs.writeShellApplication {
+        name = "test-runner";
+        text = ''
+          echo "About to test ffmpeg 5"
+          ${pkgs.lib.getExe test-runner-ffmpeg_5}
+          echo "About to test ffmpeg 6"
+          ${pkgs.lib.getExe test-runner-ffmpeg_6}
+          echo "About to test ffmpeg 7"
+          ${pkgs.lib.getExe test-runner-ffmpeg_7}
+          echo "Done testing!"
+        '';
+      };
+      test-runner-ffmpeg_5 = mk-test-runner audible-cli-ffmpeg_5;
+      test-runner-ffmpeg_6 = mk-test-runner audible-cli-ffmpeg_6;
+      test-runner-ffmpeg_7 = mk-test-runner audible-cli-ffmpeg_7;
 
       isbnlib = pkgs.python3Packages.buildPythonApplication rec {
         pname = "isbnlib";
@@ -112,16 +144,25 @@
 
         passthru.updateScript = pkgs.nix-update-script {};
 
-        meta = with pkgs.lib; {
+        meta = {
           description = "A Python framework for 'all things ISBN' including metadata, descriptions, covers...";
-          license = licenses.lgpl3Plus;
+          license = pkgs.lib.licenses.lgpl3Plus;
           homepage = "https://github.com/xlcnd/isbntools";
           changelog = "https://github.com/xlcnd/isbntools/tree/v${src.rev}/CHANGES.txt";
-          maintainers = with pkgs.lib.maintainers; [kai-tub];
+          maintainers = [pkgs.lib.maintainers.kai-tub];
         };
       };
 
       default = audible-cli;
+      audible-cli-ffmpeg_5 = audible-cli.overrideAttrs (finalAttrs: previousAttrs: {
+        pname = previousAttrs.pname + "-ffmpeg_5";
+        dependencies = [pkgs.ffmpeg_5-headless];
+      });
+      audible-cli-ffmpeg_6 = audible-cli.overrideAttrs (finalAttrs: previousAttrs: {
+        pname = previousAttrs.pname + "-ffmpeg_6";
+        dependencies = [pkgs.ffmpeg_6-headless];
+      });
+      audible-cli-ffmpeg_7 = audible-cli;
 
       # Most of the code was taken from nixpkgs and with special thanks to the
       # upstream maintainer `jvanbruegge`
@@ -148,7 +189,7 @@
           # there is no real benefit of trying to make ffmpeg smaller, as it
           # only takes about 25MB, whereas Python takes >120MB.
           # So there is nothing much I can do.
-          dependencies = [pkgs.ffmpeg-headless];
+          dependencies = [pkgs.ffmpeg_7-headless];
           makeWrapperArgs = ["--set AUDIBLE_PLUGIN_DIR $src/plugin_cmds"];
 
           nativeBuildInputs = with pkgs.python3Packages; [
