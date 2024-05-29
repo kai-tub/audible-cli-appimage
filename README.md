@@ -14,7 +14,7 @@ The AppImage _includes_ all the example plugins from upstream, such as:
 - [listening-stats](https://github.com/mkb79/audible-cli/blob/master/plugin_cmds/cmd_listening-stats.py)
 
 Probably the most useful being the `decrypt` plugin that allows decryption of the
-proprietary AAX and AAXC files with a users credentials.
+proprietary `AAX` and `AAXC` files with the user credentials.
 But please note that the plugin is meant as a proof-of-concept and for testing purposes only.
 
 Since the `decrypt` plugin is a thin wrapper around [ffmpeg](https://www.ffmpeg.org/), the
@@ -28,7 +28,7 @@ is used. To follow the `audible-cli` upstream more closely, this project uses it
 `flake.nix` file to build the packages/dependencies for more fine-grained control compared to the
 [audible-cli package from nixpkgs](https://search.nixos.org/packages?channel=23.11&show=audible-cli&from=0&size=50&sort=relevance&type=packages&query=audible-cli).
 If you are using `nix` already and only need the `audible-cli` package, I would recommended
-using [audible-cli package from nixpkgs](https://search.nixos.org/packages?channel=23.11&show=audible-cli&from=0&size=50&sort=relevance&type=packages&query=audible-cli).
+using the [audible-cli package from nixpkgs](https://search.nixos.org/packages?channel=23.11&show=audible-cli&from=0&size=50&sort=relevance&type=packages&query=audible-cli).
 Use this repository as an input, if you would like to have access to the example plugins as well.
 
 ## Status
@@ -39,5 +39,9 @@ anything related to the nix files, please report them here!
 If `audible-cli` or the `AppImage` is helpful to you,
 please consider [supporting the upstream development](https://github.com/sponsors/mkb79)!
 
+## Testing
 
+To allow for some quick sanity tests of the `decrypt` plugin, this repository includes a test runner
+that verifies if audio-books stored in the subdirectory `secrets/` can be decrypted (with various CLI argument
+combinations) with different FFMPEG versions (5, 6, and 7). 
 
