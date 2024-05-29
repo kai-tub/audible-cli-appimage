@@ -70,15 +70,16 @@
         "squashfuse": "squashfuse"
       },
       "locked": {
-        "lastModified": 1714972270,
-        "narHash": "sha256-yw246I0fLHHG5SqVv7HrAraA0qXfqtgVuLurCUBBL68=",
-        "owner": "ralismark",
+        "lastModified": 1715039914,
+        "narHash": "sha256-D0Bts6935bgRilLnMln9aTA7/Y74HN6x7iJ0IN2HaZM=",
+        "owner": "tek",
         "repo": "nix-appimage",
-        "rev": "34654a3a0afba6341f8dfcb8f3cd85a76d9452d1",
+        "rev": "573a686b3e6863bb0760b1f7f0759fab5385ee48",
         "type": "github"
       },
       "original": {
-        "owner": "ralismark",
+        "owner": "tek",
+        "ref": "tek/fix-exclude-args",
         "repo": "nix-appimage",
         "type": "github"
       }

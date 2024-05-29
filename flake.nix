@@ -7,8 +7,9 @@
     nix-filter.url = "github:numtide/nix-filter";
     # devshell.url = "github:numtide/devshell";
     nix-appimage = {
-      url = "github:ralismark/nix-appimage";
-      # inputs.nixpkgs.follows = "nixpkgs";
+      # url = "github:ralismark/nix-appimage";
+      # FUTURE: Move back to upstream once this PR is merged: https://github.com/ralismark/nix-appimage/pull/11
+      url = "github:tek/nix-appimage/tek/fix-exclude-args";
     };
   };
   outputs = {
@@ -75,6 +76,7 @@
           echo "Done testing!"
         '';
       };
+
       test-runner-ffmpeg_5 = mk-test-runner audible-cli-ffmpeg_5;
       test-runner-ffmpeg_6 = mk-test-runner audible-cli-ffmpeg_6;
       test-runner-ffmpeg_7 = mk-test-runner audible-cli-ffmpeg_7;
