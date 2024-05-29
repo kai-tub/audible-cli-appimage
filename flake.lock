@@ -70,11 +70,11 @@
         "squashfuse": "squashfuse"
       },
       "locked": {
-        "lastModified": 1695276866,
-        "narHash": "sha256-/BBbYIoDhIPcVwhvau/g4lzrjTnudeRLW5qaTu7LAVs=",
+        "lastModified": 1714972270,
+        "narHash": "sha256-yw246I0fLHHG5SqVv7HrAraA0qXfqtgVuLurCUBBL68=",
         "owner": "ralismark",
         "repo": "nix-appimage",
-        "rev": "17dd6001ec228ea0b8505d6904fc5796d3de5012",
+        "rev": "34654a3a0afba6341f8dfcb8f3cd85a76d9452d1",
         "type": "github"
       },
       "original": {
@@ -115,11 +115,11 @@
     },
     "nixpkgs_2": {
       "locked": {
-        "lastModified": 1714750952,
-        "narHash": "sha256-oOUdvPrO8CbupgDSaPou+Jv6GL+uQA2QlE33D7OLzkM=",
+        "lastModified": 1716715802,
+        "narHash": "sha256-usk0vE7VlxPX8jOavrtpOqphdfqEQpf9lgedlY/r66c=",
         "owner": "nixos",
         "repo": "nixpkgs",
-        "rev": "5fd8536a9a5932d4ae8de52b7dc08d92041237fc",
+        "rev": "e2dd4e18cc1c7314e24154331bae07df76eb582f",
         "type": "github"
       },
       "original": {

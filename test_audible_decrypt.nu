@@ -3,46 +3,78 @@
 use std assert
 use std log
 
-# the testing framework of nushell is horribly broken
-# I am just waaay better of without dicking around with it.
-# great... The issue seems to originally come from this sucka:
-# https://github.com/nushell/nushell/pull/12470
-# the required debug variable was accidentally renamed to NU_log-level...
-# and that a test function cannot be a subcommand or generally start with ""
+# the testing framework of nushell is broken way too often
+# and some core-contributors don't even recommend it.
+# The better solution is to simply roll your own simple testing code
+# or to move to Nupm.
 
-def main [] {
+# Run all available tests and stop at first error
+export def main [] {
   let exec_path = which audible | get path | path expand
-  print $"Using the following audible path: ($exec_path)"
+  log info $"Using the following audible path: ($exec_path)"  
+  # Note: I cannot call ffmpeg -version as FFMPEG is a runtime path for the python
+  # application and this would call the ffmpeg version of the local path!
+  log info ("audible --version: " + (^audible --version))
 
-  let requires_no_force_file = $"($env.FILE_PWD)/secrets/requires_no_force_file.aaxc"
+  test_decrypt_default_no_force
+  test_decrypt_default_force
+  test_decrypt_rebuild_chapters_no_force 
+  test_decrypt_rebuild_chapters_force 
+}
+
+def with-test-env [closure: closure]: nothing -> nothing {
+  let requires_no_force_file = $"($env.PWD)/secrets/requires_no_force_file.aaxc"
   let msg_1 = $"Make sure to locally provide sample data that requires no force flag to rebuild the chapters under: ($requires_no_force_file)"
   assert ($requires_no_force_file | path exists) $msg_1
 
-  let requires_force_file = $"($env.FILE_PWD)/secrets/requires_force_file.aaxc"
+  let requires_force_file = $"($env.PWD)/secrets/requires_force_file.aaxc"
   let msg_2 = $"Make sure to locally provide sample data that requires the force flag to rebuild the chapters under: ($requires_force_file)"
   assert ($requires_force_file | path exists) $msg_2
 
-  let tmp_path = mktemp -d
-  test_decrypt_default $requires_no_force_file $tmp_path
-  test_decrypt_default $requires_force_file $tmp_path
-  rm -r $tmp_path
+  let temp = mktemp -d
 
-  let tmp_path = mktemp -d
-  test_decrypt_rebuild_chapters $requires_no_force_file $tmp_path
-  test_decrypt_rebuild_chapters --force $requires_force_file $tmp_path
-  rm -r $tmp_path
+  with-env {
+    TEMP_DIR: $temp
+    REQUIRES_NO_FORCE_FILE: $requires_no_force_file
+    REQUIRES_FORCE_FILE: $requires_force_file
+  } $closure
+  
+  rm --recursive $temp
 }
 
+export def test_decrypt_default_no_force [] {
+  with-test-env {
+    _test_decrypt_default $env.REQUIRES_NO_FORCE_FILE $env.TEMP_DIR
+  }
+}
+
+export def test_decrypt_default_force [] {
+  with-test-env {
+    _test_decrypt_default $env.REQUIRES_FORCE_FILE $env.TEMP_DIR
+  }
+}
+
+export def test_decrypt_rebuild_chapters_no_force [] {
+  with-test-env {
+    _test_decrypt_rebuild_chapters $env.REQUIRES_NO_FORCE_FILE $env.TEMP_DIR
+  }
+}
+
+export def test_decrypt_rebuild_chapters_force [] {
+  with-test-env {
+    _test_decrypt_rebuild_chapters $env.REQUIRES_FORCE_FILE $env.TEMP_DIR --force
+  }
+}
+  
 def "complete check" [message]: record -> string {
   let inp = $in
   let msg = $"($message)\n\n($inp | table)"
   if $inp.exit_code != 0 {
-   print $msg 
+   log error $msg 
    exit 1
   }
 
-  # log info $inp.stdout
-
+  log debug $inp.stdout
   $inp.stdout
 }
 
@@ -65,7 +97,7 @@ def "chapter_count" [] {
 # Tests overwriting by running the command twice and ensuring that
 # the number of chapters remains identical
 # FUTURE: Consider checking out smarter inspect commands
-def test_decrypt_default [
+def _test_decrypt_default [
   file: path
   dir: path
 ] {
@@ -94,7 +126,7 @@ def test_decrypt_default [
 # Then with again with `--separate-intro-outro`
 # And again with `remove-intro-outro`
 # Will check if number of chapters is correct for the given configurations
-def test_decrypt_rebuild_chapters [
+def _test_decrypt_rebuild_chapters [
   file
   tmp_dir
   --force

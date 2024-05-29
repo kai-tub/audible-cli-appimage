@@ -46,10 +46,10 @@
               name = "test-runner";
               src = filter {
                 root = ./.;
-                include = ["test.nu"];
+                include = ["test_audible_decrypt.nu"];
               };
               installPhase = ''
-                cp $src/test.nu $out
+                cp $src/test_audible_decrypt.nu $out
               '';
             };
           in ''
@@ -154,11 +154,11 @@
       };
 
       default = audible-cli;
-      audible-cli-ffmpeg_5 = audible-cli.overrideAttrs (finalAttrs: previousAttrs: {
+      audible-cli-ffmpeg_5 = audible-cli.overridePythonAttrs (previousAttrs: {
         pname = previousAttrs.pname + "-ffmpeg_5";
         dependencies = [pkgs.ffmpeg_5-headless];
       });
-      audible-cli-ffmpeg_6 = audible-cli.overrideAttrs (finalAttrs: previousAttrs: {
+      audible-cli-ffmpeg_6 = audible-cli.overridePythonAttrs (previousAttrs: {
         pname = previousAttrs.pname + "-ffmpeg_6";
         dependencies = [pkgs.ffmpeg_6-headless];
       });
